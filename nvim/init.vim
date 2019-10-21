@@ -27,6 +27,7 @@ Plug 'rhysd/vim-color-spring-night'
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
+Plug 'SirVer/ultisnips'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-surround'
@@ -303,6 +304,14 @@ nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
+" UltiSnips" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
+" let g:UltiSnipsExpandTrigger='<c-o>'
+let g:UltiSnipsJumpForwardTrigger='<c-j>'
+let g:UltiSnipsJumpBackwardTrigger='<c-k>'
+
+" If you want :UltiSnipsEdit to split your window.
+let g:UltiSnipsEditSplit='vertical'
+
 """ Custom Functions
 
 " Trim Whitespaces
@@ -353,7 +362,7 @@ set clipboard=unnamedplus
 let mapleader=","
 nmap <leader>q :NERDTreeToggle<CR>
 nmap <leader>s :call CodiScratchpad()<CR>
-nmap <leader>S :call SnipEdit()<CR>
+nmap <leader>S :UltiSnipsEdit<CR>
 nmap \ <leader>q
 nmap <C-\> :NERDTreeFind<CR>
 autocmd FileType python nmap <leader>x :0,$!~/.config/nvim/env/bin/python -m yapf<CR>
