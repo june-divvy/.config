@@ -32,6 +32,7 @@ Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-surround'
 Plug 'scrooloose/nerdtree'
 Plug 'scrooloose/nerdcommenter'
+Plug 'dbakker/vim-projectroot'
 Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/vim-easy-align'
 Plug 'alvan/vim-closetag'
@@ -56,17 +57,11 @@ let g:python3_host_prog = expand('~/.config/nvim/env/bin/python')
 """ Coloring
 syntax on
 color dracula
-highlight Pmenu guibg=white guifg=black gui=bold
+highlight Pmenu guibg=NONE ctermbg=NONE
 highlight Comment gui=bold
-highlight Normal gui=none
-highlight NonText guibg=none
-
-" Opaque Background (Comment out to use terminal's profile)
-set termguicolors
-
-" Transparent Background (For i3 and compton)
 highlight Normal guibg=NONE ctermbg=NONE
 highlight LineNr guibg=NONE ctermbg=NONE
+highlight NonText guibg=none
 
 """ Other Configurations
 filetype plugin indent on
@@ -93,23 +88,71 @@ let g:airline_powerline_fonts = 1
 let g:airline_section_z = ' %{strftime("%-I:%M %p")}'
 let g:airline_section_warning = ''
 
-" Neovim :Terminal
-tmap <Esc> <C-\><C-n>
-tmap <C-w> <Esc><C-w>
-"tmap <C-d> <Esc>:q<CR>
-autocmd BufWinEnter,WinEnter term://* startinsert
-autocmd BufLeave term://* stopinsert
+" fzf
+
+" Reverse the layout to make the FZF list top-down
+" let $FZF_DEFAULT_OPTS='--layout=reverse --ansi --preview (highlight -O ansi -l {} 2>/dev/null || bat {} || tree -C {}) 2>/dev/null'
+let $FZF_DEFAULT_OPTS='--layout=reverse'
+" Using the custom window creation function
+let g:fzf_layout = { 'window': 'call FloatingFZF()' }
+" Function to create the custom floating window
+function! FloatingFZF()
+  " creates a scratch, unlisted, new, empty, unnamed buffer
+  " to be used in the floating window
+  let buf = nvim_create_buf(v:false, v:true)
+  " 90% of the height
+  let height = float2nr(&lines * 0.9)
+  " 60% of the width
+  let width = float2nr(&columns * 0.6)
+  " horizontal position (centralized)
+  let horizontal = float2nr((&columns - width) / 2)
+  " vertical position (one line down of the top)
+  let vertical = 1
+  let opts = {
+        \ 'relative': 'win',
+        \ 'row': vertical,
+        \ 'col': horizontal,
+        \ 'width': width,
+        \ 'height': height,
+        \ }
+  " open the new window, floating, and enter to it
+  call nvim_open_win(buf, v:true, opts)
+endfunction
+" file finder mapping
+nmap <c-p> :<c-u>ProjectRootExe Files<CR>
+" general code finder in all files mapping
+nmap <c-g> :<c-u>ProjectRootExe Rg<CR>
+" commands finder mapping
+nmap <leader>c :Commands<CR>
+" Files command with preview window
+" let $FZF_DEFAULT_OPTS='--layout=reverse'
+command! -bang -nargs=? -complete=dir Files
+  \ call fzf#vim#files(<q-args>, fzf#vim#with_preview('down:70%'), <bang>0)
+
+" Ripgrep setting with preview window
+command! -bang -nargs=* Rg
+      \ call fzf#vim#grep(
+      \   'rg --column --no-heading --fixed-strings --line-number --smart-case '.shellescape(<q-args>), 1,
+      \   fzf#vim#with_preview({'options': '--delimiter : --nth 4.. -e'}, 'down:70%'),
+      \   <bang>0)
+
+autocmd! FileType fzf tnoremap <buffer> <esc> <c-c>
+
+" Codi
+
+function! CodiScratchpad()
+    let coditype=&filetype
+    call FloatingFZF()
+    execute 'Codi' coditype
+endfunction
+
+
+nmap <leader>s :call CodiScratchpad()<CR>
 
 " Deoplete
 let g:deoplete#enable_at_startup = 1
 " Disable documentation window
 set completeopt-=preview
-
-
-" Ultisnips
-let g:UltiSnipsExpandTrigger="<C-Space>"
-let g:UltiSnipsJumpForwardTrigger="<Tab>"
-let g:UltiSnipsJumpBackwardTrigger="<C-x>"
 
 " EasyAlign
 xmap ga <Plug>(EasyAlign)
@@ -261,17 +304,13 @@ nnoremap <silent> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+" Snippet expansion
+imap <C-l> <Plug>(coc-snippets-expand)
+
 """ Custom Functions
 
 " Trim Whitespaces
-" command! -nargs=1 Floatprev call FloatingPreview(<f-args>>)
-" command! Floatprev call FloatingPreview()
-
-" function! FloatingPreview()
-    " execute ('badd ~/.config/nvim/coc-settings.json')
-    " call nvim_open_win('~/.config/nvim/coc-settings.json', 0, {  'relative':'win',  'width' : winwidth(0)/2-10,  'height' : winheight(0)/2,  'bufpos': [ 20, 23 ]})
-" endfunction
-
 function! TrimWhitespace()
     let l:save = winsaveview()
     %s/\\\@<!\s\+$//e
@@ -308,81 +347,21 @@ function! ColorZazen()
     IndentLinesEnable
 endfunction
 
+function! SnipEdit()
+    execute "vsplit"
+    execute "CocCommand snippets.editSnippets"
+endfunction
+
 """ Custom Mappings
 set mouse=a
 set clipboard=unnamedplus
 let mapleader=","
 nmap <leader>q :NERDTreeToggle<CR>
+nmap <leader>s :call CodiScratchpad()<CR>
+nmap <leader>S :call SnipEdit()<CR>
 nmap \ <leader>q
 nmap <C-\> :NERDTreeFind<CR>
-"nmap <leader>w :TagbarToggle<CR>
-" nmap <leader>ee :Colors<CR>
-" nmap <leader>ea :AirlineTheme 
-" nmap <leader>e1 :call ColorDracula()<CR>
-" nmap <leader>e2 :call ColorSeoul256()<CR>
-" nmap <leader>e3 :call ColorForgotten()<CR>
-" nmap <leader>e4 :call ColorZazen()<CR>
-" nmap <leader>r :so ~/.config/nvim/init.vim<CR>
-" nmap <leader>t :call TrimWhitespace()<CR>
-" xmap <leader>a gaip*
-" nmap <leader>a gaip*
-" nmap <leader>s <C-w>s<C-w>j:terminal<CR>
-" nmap <leader>vs <C-w>v<C-w>l:terminal<CR>
-" nmap <leader>d <Plug>(pydocstring)
-" nmap <leader>f :Files<CR>
-" nmap <leader>g :Goyo<CR>
-" nmap <leader>h :RainbowParentheses!!<CR>
-" nmap <leader>j :set filetype=journal<CR>
-" nmap <leader>k :ColorToggle<CR>
-" nmap <leader>l :Limelight!!<CR>
-" xmap <leader>l :Limelight!!<CR>
 autocmd FileType python nmap <leader>x :0,$!~/.config/nvim/env/bin/python -m yapf<CR>
-"nmap <leader>n :HackerNews best<CR>J
 nmap <silent> <leader><leader> :noh<CR>
 nmap <Tab> :bnext<CR>
 nmap <S-Tab> :bprevious<CR>
-" Fzf ------------------------------
-"
-" Reverse the layout to make the FZF list top-down
-let $FZF_DEFAULT_OPTS='--layout=reverse'
-" Using the custom window creation function
-let g:fzf_layout = { 'window': 'call FloatingFZF()' }
-" Function to create the custom floating window
-function! FloatingFZF()
-  " creates a scratch, unlisted, new, empty, unnamed buffer
-  " to be used in the floating window
-  let buf = nvim_create_buf(v:false, v:true)
-  " 90% of the height
-  let height = float2nr(&lines * 0.9)
-  " 60% of the height
-  let width = float2nr(&columns * 0.6)
-  " horizontal position (centralized)
-  let horizontal = float2nr((&columns - width) / 2)
-  " vertical position (one line down of the top)
-  let vertical = 1
-  let opts = {
-        \ 'relative': 'ditor',
-        \ 'row': vertical,
-        \ 'col': horizontal,
-        \ 'width': width,
-        \ 'height': height
-        \ }
-" open the new window, floating, and enter to it
-call nvim_open_win(buf, v:true, opts)
-endfunction
-" file finder mapping
-nmap <c-p> :Files<CR>
-" general code finder in all files mapping
-nmap <c-g> :Rg<CR>
-" commands finder mapping
-nmap ,c :Commands<CR>
-" Files command with preview window
-command! -bang -nargs=? -complete=dir Files
-  \ call fzf#vim#files(<q-args>, fzf#vim#with_preview('right:50%'), <bang>0)
-" Ripgrep setting with preview window
-command! -bang -nargs=* Rg
-      \ call fzf#vim#grep(
-      \   'rg --column --no-heading --fixed-strings --line-number --color=always --smart-case '.shellescape(<q-args>), 1,
-      \   fzf#vim#with_preview({'options': '--delimiter : --nth 4.. -e'}, 'right:50%'),
-      \   <bang>0)e
-
