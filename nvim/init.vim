@@ -23,7 +23,7 @@ Plug 'chriskempson/tomorrow-theme', { 'rtp': 'vim' }
 Plug 'rhysd/vim-color-spring-night'
 
 " Functionalities
-"
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -108,7 +108,7 @@ function! FloatingFZF()
   " vertical position (one line down of the top)
   let vertical = 1
   let opts = {
-        \ 'relative': 'win',
+        \ 'relative': 'editor',
         \ 'row': vertical,
         \ 'col': horizontal,
         \ 'width': width,
@@ -136,6 +136,11 @@ command! -bang -nargs=* Rg
       \   <bang>0)
 
 autocmd! FileType fzf tnoremap <buffer> <esc> <c-c>
+
+let g:fzf_action = {
+  \ 'ctrl-o': 'edit',
+  \ 'ctrl-s': 'split',
+  \ 'enter': 'vsplit' }
 
 " Codi
 
@@ -305,7 +310,7 @@ nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
 " UltiSnips" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-" let g:UltiSnipsExpandTrigger='<c-o>'
+let g:UltiSnipsExpandTrigger='<c-o>'
 let g:UltiSnipsJumpForwardTrigger='<c-j>'
 let g:UltiSnipsJumpBackwardTrigger='<c-k>'
 
