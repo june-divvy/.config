@@ -1,0 +1,217 @@
+snippet fun "function with dynamic docblock" b
+`!p
+# Currently Ultisnips does not support dynamic tabstops, so we cannot add
+# tabstops to the datatype for these param tags until that feature is added.
+def formatTag(argument):
+	return " * @param {{}} {0}".format(argument)
+
+arguments = t[2].split(',')
+arguments = [argument.strip() for argument in arguments if argument]
+
+if len(arguments):
+	tags = map(formatTag, arguments)
+	snip.rv = "/**"
+	for tag in tags:
+		snip += tag
+	snip += ' */'
+	snip += ''
+else:
+	snip.rv = ''
+`const ${1} = (${2}) => {
+	${0:${VISUAL}}
+};
+endsnippet
+
+# Snippet for getting the boilerplate out of the goddamn way for mutations
+# TODO: Make the imports dynamic
+# TODO: Make types dynamic as well
+# TODO: 
+snippet mut "Divvy-Homes mutation snippet" b
+const { GraphQLString } = require('graphql');
+const { possessions, actions, resources } = require('@app/constants/authorization');
+const withAuth = require('@app/authorization').default;
+
+`!p
+if len(t[1]) >=1:
+	snip.rv = "const "+t[1]+"Spec = {"
+	snip += "  resource: resources.ANY // Change this asap,"
+	snip += "  action: actions.ANY, // This too"
+	snip += "  possession: possessions.ANY, // Also this"
+	snip += "};"
+	snip += ""
+else:
+	snip.rv = ""
+`
+const ${1} = {
+  type: ${2},
+  args: {`!p
+def mutation_fields(argument):
+	return "    " + argument + ": { type: GraphQLString },"
+
+arguments = t[3].split(',\n')
+arguments = [argument.strip().strip(",") for argument in arguments if argument]
+
+if len(arguments):
+	fields = map(mutation_fields, arguments)
+	for field in fields:
+		snip += field
+else:
+	snip.rv = ''
+`
+  },
+  resolve: withAuth(`!p
+if len(t[1]) >=1:
+	snip += "    "+t[1]+"Spec,"
+`
+    async (
+      source,
+      {
+        ${3}
+      },
+    ) => {
+      ${0:${VISUAL}}
+    }
+  )
+};
+`!p
+if len(t[1]) >=1:
+	snip+="module.exports = { " + t[1] + " };"
+`
+endsnippet
+
+# Snippet for writing describe portion of unit tests
+# TODO: variable number of it() functions
+# TODO: optional beforeEach and afterEach functions
+# TODO: import fixtures where necessary
+snippet desc "unit test describe pattern" b
+/* eslint-env */
+
+describe('${1}', () => {
+  ${0:${VISUAL}}
+});
+endsnippet
+
+# Snippet for writing it portion of unit tests
+snippet test "unit test it pattern" b
+it('${1}', async () => {
+  ${0:${VISUAL}}
+  expect(${2}).${3};
+});
+endsnippet
+
+# Sequelize model snippet
+snippet model "model definition with imports" b
+`!p
+camel_cased_filename="".join([i.title() for i in snip.basename.split('-')])
+`
+
+const Sequelize = require('sequelize').default;
+
+const Model = require('../sequelize').default;
+
+const `!p snip.rv=camel_cased_filename` = Model.define( 
+  '`!p snip.rv=camel_cased_filename`', {
+    id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.literal('uuid_generate_v4()'),
+      primaryKey: true,
+      allowNull: false,
+    },
+    `!p
+`$0
+    createdAt: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      allowNull: false,
+      field: 'created_at',
+    },
+    updatedAt: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      allowNull: false,
+      field: 'updated_at',
+    },
+    deletedAt: {
+      type: Sequelize.DATE,
+      allowNull: true,
+      field: 'deleted_at',
+  },
+  },
+  {
+    tableName:'`!p
+snip.rv="_".join(snip.basename.split('-'))
+`',
+    underscored: true,
+    timestamps: true,
+    paranoid: true,
+    freezeTableName: true,
+  },
+);
+
+export default `!p snip.rv = camel_cased_filename`;
+endsnippet
+
+
+# Sequelize field snippet
+snippet field "field snippet"
+${1}: {
+  field:`!p 
+if len(t[1]) >0:
+	l = "  "+"'"+t[1][0].lower()
+	l += "".join([f"_{i.lower()}" if i.isupper() else i for i in t[1][1:]]) if len(t[1])>1 else ''
+	l += "',"
+	snip.rv = l
+`
+  type: Sequelize.${2},
+  allowNull: ${3:true},
+},
+$0
+endsnippet
+
+# Todo comment snippet
+snippet td "Todo comment"
+// TODO: $0
+endsnippet
+
+# Type snippet
+snippet tp "Snippet for adding new types"
+`!p
+camel_cased_filename="".join([i.title() for i in snip.basename.split('-')])
+`
+
+import { GraphQLObjectType, /* add imports ya dingus */ } from 'graphql';
+import GraphQLUUID from 'graphql-type-uuid';
+
+const `!p snip.rv=camel_cased_filename`= new GraphQLObjectType({
+  name: '`!p snip.rv=camel_cased_filename.replace('Type','')`',
+  fields: {
+    id: { type: GraphQLUUID },
+    $0
+  },
+});
+
+export default `!p snip.rv=camel_cased_filename`;
+endsnippet
+
+# Smaller type snippet. For filling out things like fields on graphql mutations
+snippet tpe "type entry for graphql fields and the like"
+${1}: {type: ${2:GraphQLString}},
+$0
+endsnippet
+
+
+# Object snippet
+snippet objct "snippet for adding object"
+const ${1} = { $0 };
+endsnippet
+
+# snippet to log metrics
+snippet lgmtrc "logMetric snippet" b
+const ${1} = {${3:dummyInfo: "dummyInfo"} };
+logMetric({metricType: '${4}', body:JSON.stringify($1)});$0
+endsnippet
+
+# dumb dictionary snippet
+snippet dctry "really dumb goddamn dictionary snippet"
+${1}: '$1',$0
+endsnippet

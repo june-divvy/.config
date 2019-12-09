@@ -23,6 +23,7 @@ Plug 'chriskempson/tomorrow-theme', { 'rtp': 'vim' }
 Plug 'rhysd/vim-color-spring-night'
 
 " Functionalities
+Plug 'lervag/vimtex'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -144,14 +145,29 @@ let g:fzf_action = {
 
 " Codi
 
+let g:codi#width = 40
+let g:codi#rightalign = 0
 function! CodiScratchpad()
     let coditype=&filetype
-    call FloatingFZF()
+    let buf = nvim_create_buf(v:false, v:true)
+    execute 'split buf'
+    "call FloatingFZF()
     execute 'Codi' coditype
 endfunction
 
+function! CodiScratch()
+    let coditype=&filetype
+    noswapfile hide new
+    " execute 'setlocal buftype=nofile'
+    execute 'setlocal ft='.coditype
+    "setlocal bufhidden=hide
+    "setlocal nobuflisted
+    "lcd ~
+    execute 'Codi' coditype
+    execute 'setlocal ft='.coditype
+endfunction
 
-nmap <leader>s :call CodiScratchpad()<CR>
+
 
 " Deoplete
 let g:deoplete#enable_at_startup = 1
@@ -365,9 +381,15 @@ endfunction
 set mouse=a
 set clipboard=unnamedplus
 let mapleader=","
+tnoremap <Esc> <C-\><C-n>
+nmap <leader>t :below split<CR><Esc>:term<CR>A
+nmap <leader>j :.!python -m json.tool<CR>
 nmap <leader>q :NERDTreeToggle<CR>
-nmap <leader>s :call CodiScratchpad()<CR>
+nmap <leader>s :call CodiScratch()<CR>
 nmap <leader>S :UltiSnipsEdit<CR>
+nmap <leader>e :vsplit $MYVIMRC<CR>
+nmap <leader>r :source $MYVIMRC<CR>
+nmap <leader>g :G<CR>
 nmap \ <leader>q
 nmap <C-\> :NERDTreeFind<CR>
 autocmd FileType python nmap <leader>x :0,$!~/.config/nvim/env/bin/python -m yapf<CR>
