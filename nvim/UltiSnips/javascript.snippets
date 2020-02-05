@@ -22,6 +22,30 @@ else:
 };
 endsnippet
 
+snippet afun "async function with dynamic docblock" b
+`!p
+# Currently Ultisnips does not support dynamic tabstops, so we cannot add
+# tabstops to the datatype for these param tags until that feature is added.
+def formatTag(argument):
+	return " * @param {{}} {0}".format(argument)
+
+arguments = t[2].split(',')
+arguments = [argument.strip() for argument in arguments if argument]
+
+if len(arguments):
+	tags = map(formatTag, arguments)
+	snip.rv = "/**"
+	for tag in tags:
+		snip += tag
+	snip += ' */'
+	snip += ''
+else:
+	snip.rv = ''
+`const ${1} = async (${2}) => {
+	${0:${VISUAL}}
+};
+endsnippet
+
 # Snippet for getting the boilerplate out of the goddamn way for mutations
 # TODO: Make the imports dynamic
 # TODO: Make types dynamic as well
@@ -214,4 +238,42 @@ endsnippet
 # dumb dictionary snippet
 snippet dctry "really dumb goddamn dictionary snippet"
 ${1}: '$1',$0
+endsnippet
+
+
+# import
+snippet req "snippet for requires"
+const ${1} = require('${2}');$0
+endsnippet
+
+# static Async class methods
+snippet staymeth "static async method with dynamic docblock" b
+`!p
+def formatTag(argument):
+	return " * @param {{}} {0}".format(argument)
+
+arguments = t[2].split(',')
+arguments = [argument.strip() for argument in arguments if argument]
+
+if len(arguments):
+	tags = map(formatTag, arguments)
+	snip.rv = "/**"
+	for tag in tags:
+		snip += tag
+	snip += ' */'
+	snip += ''
+else:
+	snip.rv = ''
+`static async ${1}(${2}) {
+	${0:${VISUAL}}
+};
+endsnippet
+
+snippet appComp "component for the existing applications"
+{
+	type: '${1}',
+	name: '${2}',
+	config: {
+		${3}
+},$0
 endsnippet
