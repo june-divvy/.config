@@ -390,6 +390,7 @@ nmap <leader>S :UltiSnipsEdit<CR>
 nmap <leader>e :vsplit $MYVIMRC<CR>
 nmap <leader>r :source $MYVIMRC<CR>
 nmap <leader>g :G<CR>
+nmap <leader>f :CocCommand prettier.formatFile<CR>
 nmap \ <leader>q
 nmap <C-\> :NERDTreeFind<CR>
 autocmd FileType python nmap <leader>x :0,$!~/.config/nvim/env/bin/python -m yapf<CR>
