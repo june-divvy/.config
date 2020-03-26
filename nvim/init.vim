@@ -24,6 +24,7 @@ Plug 'rhysd/vim-color-spring-night'
 
 " Functionalities
 Plug 'lervag/vimtex'
+Plug 'mhinz/vim-startify'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -45,6 +46,7 @@ Plug 'heavenshell/vim-pydocstring'
 Plug 'vim-scripts/loremipsum'
 Plug 'metakirby5/codi.vim'
 Plug 'dkarter/bullets.vim'
+Plug 't9md/vim-choosewin'
 
 " Functionalities for javascript
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -54,6 +56,9 @@ call plug#end()
 """ Python3 VirtualEnv
 let g:python3_host_prog = expand('~/.config/nvim/env/bin/python')
 
+""" COC node location
+let g:coc_node_path = "/Users/juneoverbeck/.nvm/versions/node/v13.9.0/bin/node"
+
 """ Coloring
 syntax on
 color dracula
@@ -62,10 +67,11 @@ highlight Comment gui=bold
 highlight Normal guibg=NONE ctermbg=NONE
 highlight LineNr guibg=NONE ctermbg=NONE
 highlight NonText guibg=none
+" highlight CocErrorHighlight  ctermfg=Green guifg=Blue
 
 """ Other Configurations
 filetype plugin indent on
-set tabstop=4 softtabstop=4 shiftwidth=4 expandtab smarttab autoindent
+set tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab autoindent
 set incsearch ignorecase smartcase hlsearch
 set ruler laststatus=2 showcmd showmode
 set list listchars=trail:»,tab:»-
@@ -75,7 +81,9 @@ set encoding=utf-8
 set number
 set title
 set splitright
-
+set conceallevel=0
+set hidden
+" set nrformats+=alpha
 """ Plugin Configurations
 
 " NERDTree
@@ -170,15 +178,16 @@ endfunction
 
 
 " Deoplete
-let g:deoplete#enable_at_startup = 1
+"let g:deoplete#enable_at_startup = 1
 " Disable documentation window
-set completeopt-=preview
+" set completeopt-=preview
 
 " EasyAlign
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
 " indentLine
+let g:indentLine_setConceal = 0
 let g:indentLine_char = '▏'
 let g:indentLine_color_gui = '#363949'
 
@@ -217,6 +226,8 @@ set updatetime=300
 set shortmess+=c
 set signcolumn=yes
 
+autocmd FileType javascript let b:coc_root_patterns = ['.git', '.nvm']
+
 inoremap <silent><expr> <TAB>
         \ pumvisible() ? "\<C-n>":
         \ <SID>check_back_space() ? "\<TAB>" :
@@ -247,6 +258,7 @@ nmap <silent> gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window
 nnoremap <silent> K :call <SID>show_documentation()<CR>
+nnoremap <silent> <leader>k :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -260,7 +272,6 @@ endfunction
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " Remap for rename current word
-nmap <leader>rn <Plug>(coc-rename)
 
 " Remap for format selected region
 xmap <leader>f  <Plug>(coc-format-selected)
@@ -333,6 +344,10 @@ let g:UltiSnipsJumpBackwardTrigger='<c-k>'
 " If you want :UltiSnipsEdit to split your window.
 let g:UltiSnipsEditSplit='vertical'
 
+
+" vim-choosewin stuff
+
+let g:choosewin_overlay_enable = 1
 """ Custom Functions
 
 " Trim Whitespaces
@@ -384,14 +399,17 @@ let mapleader=","
 tnoremap <Esc> <C-\><C-n>
 nmap <leader>t :below split<CR><Esc>:term<CR>A
 nmap <leader>j :.!python -m json.tool<CR>
-nmap <leader>q :NERDTreeToggle<CR>
+" nmap <leader>q :NERDTreeToggle<CR>
 nmap <leader>s :call CodiScratch()<CR>
 nmap <leader>S :UltiSnipsEdit<CR>
 nmap <leader>e :vsplit $MYVIMRC<CR>
 nmap <leader>r :source $MYVIMRC<CR>
+nmap <leader>k :vsplit /Users/juneoverbeck/projects/qmk_firmware/keyboards/crkbd/keymaps/junetown<CR>
 nmap <leader>g :G<CR>
 nmap <leader>f :CocCommand prettier.formatFile<CR>
-nmap \ <leader>q
+nmap <leader>n <Plug>(coc-rename)
+nmap  -  <Plug>(choosewin)
+nmap \ :NERDTreeToggle<CR>
 nmap <C-\> :NERDTreeFind<CR>
 autocmd FileType python nmap <leader>x :0,$!~/.config/nvim/env/bin/python -m yapf<CR>
 nmap <silent> <leader><leader> :noh<CR>
